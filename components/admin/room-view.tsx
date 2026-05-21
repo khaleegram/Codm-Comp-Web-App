@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { needsGame3, determineMatchWinner } from '@/lib/types'
+import { needsGame3, determineMatchWinner, getMatchRoomNumber } from '@/lib/types'
 import type { Match } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -28,8 +28,8 @@ export function AdminRoomView() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {rooms.map(roomNum => {
-          const activeMatch = matches.find(m => m.status === 'in_progress' && m.room_number === roomNum)
-          const nextPending = matches.filter(m => m.status === 'pending' && m.player1_id && m.player2_id && m.room_number === roomNum)
+          const activeMatch = matches.find(m => m.status === 'in_progress' && getMatchRoomNumber(m) === roomNum)
+          const nextPending = matches.filter(m => m.status === 'pending' && m.player1_id && m.player2_id && getMatchRoomNumber(m) === roomNum)
             .sort((a, b) => a.round - b.round || a.match_number - b.match_number)[0]
 
           if (activeMatch) {
@@ -300,10 +300,12 @@ function PendingRoomCard({ match, roomNum }: { match: Match; roomNum: number }) 
 
   const startMatch = async () => {
     setStarting(true)
+    const assignedRoom = getMatchRoomNumber(match)
     await supabase
       .from('matches')
       .update({
         status: 'in_progress',
+        room_number: assignedRoom,
       })
       .eq('id', match.id)
     

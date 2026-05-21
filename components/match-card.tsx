@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils'
 import type { Match } from '@/lib/types'
 import { useTournament } from '@/components/tournament-provider'
+import { getMatchRoomNumber } from '@/lib/types'
 
 interface MatchCardProps {
   match: Match | null
@@ -57,11 +58,10 @@ export function MatchCard({ match, showConnector = false, isCompact = false }: M
         </div>
       )}
       
-      {'room_number' in match && match.room_number && (
-        <div className="absolute -top-2 right-3 px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded">
-          Room {match.room_number}
-        </div>
-      )}
+      <div className="absolute -top-2 right-3 px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded font-medium shadow-sm">
+        Room {getMatchRoomNumber(match)}
+      </div>
+
 
       <div className="flex flex-col gap-1">
         <PlayerSlot 

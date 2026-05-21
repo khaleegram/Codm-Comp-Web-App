@@ -128,3 +128,12 @@ export const BRACKET_MATCHUPS: Array<{ match: number; seed1: number; seed2: numb
   { match: 15, seed1: 15, seed2: 18 },
   { match: 16, seed1: 31, seed2: 2 },
 ]
+
+// Helper to get auto-assigned room number if null in database
+export function getMatchRoomNumber(match: { round: number; match_number: number; room_number: number | null }): number {
+  if (match.room_number !== null && match.room_number !== undefined) {
+    return match.room_number
+  }
+  return match.round === 5 ? 1 : ((match.match_number - 1) % 4) + 1
+}
+

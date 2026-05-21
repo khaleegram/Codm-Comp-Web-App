@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useTournament } from '@/components/tournament-provider'
 import { countGamesWon } from '@/components/match-card'
+import { getMatchRoomNumber } from '@/lib/types'
 import type { Match } from '@/lib/types'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -95,7 +96,7 @@ export function FixturesList() {
       statusText = `✅ Completed • Winner: ${winnerName}`
       scoreText = `📊 Final Score: ${p1Name} [${p1Wins}] - [${p2Wins}] ${p2Name}`
     } else if (match.status === 'in_progress') {
-      statusText = `🔴 LIVE • Room ${match.room_number || 'TBD'}`
+      statusText = `🔴 LIVE • Room ${getMatchRoomNumber(match)}`
       scoreText = `📊 Current Score: ${p1Name} [${p1Wins}] - [${p2Wins}] ${p2Name}`
     } else {
       statusText = `⏳ Upcoming`
@@ -321,11 +322,9 @@ Join/follow live brackets at: ${window.location.origin}`
                         </Badge>
                       )}
 
-                      {fixture.room_number && (
-                        <span className="text-primary font-semibold flex items-center gap-1 ml-1 text-[11px] sm:text-xs">
-                          <Tv className="h-3.5 w-3.5" /> Room {fixture.room_number}
-                        </span>
-                      )}
+                      <span className="text-primary font-semibold flex items-center gap-1 ml-1 text-[11px] sm:text-xs">
+                        <Tv className="h-3.5 w-3.5" /> Room {getMatchRoomNumber(fixture)}
+                      </span>
                     </div>
 
                     {/* Team/Player Matchup */}
