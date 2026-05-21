@@ -184,6 +184,7 @@ export function AdminTournamentSetup() {
         player2_id: string | null
         player1_name: string | null
         player2_name: string | null
+        room_number: number
       }> = []
 
       // Round 1 (Round of 32): 16 matches using seeded matchups
@@ -197,6 +198,7 @@ export function AdminTournamentSetup() {
           player2_id: p2?.id || null,
           player1_name: p1?.name || null,
           player2_name: p2?.name || null,
+          room_number: ((match - 1) % 4) + 1,
         })
       })
 
@@ -209,6 +211,7 @@ export function AdminTournamentSetup() {
           player2_id: null,
           player1_name: null,
           player2_name: null,
+          room_number: ((match - 1) % 4) + 1,
         })
       }
 
@@ -221,6 +224,7 @@ export function AdminTournamentSetup() {
           player2_id: null,
           player1_name: null,
           player2_name: null,
+          room_number: ((match - 1) % 4) + 1,
         })
       }
 
@@ -233,6 +237,7 @@ export function AdminTournamentSetup() {
           player2_id: null,
           player1_name: null,
           player2_name: null,
+          room_number: ((match - 1) % 4) + 1,
         })
       }
 
@@ -244,6 +249,7 @@ export function AdminTournamentSetup() {
         player2_id: null,
         player1_name: null,
         player2_name: null,
+        room_number: 1,
       })
 
       const { error: matchesError } = await supabase.from('matches').insert(matchesToInsert)
