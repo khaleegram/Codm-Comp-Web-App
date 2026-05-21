@@ -34,18 +34,45 @@ export function AdminTournamentSetup() {
     let names = Object.values(playerNames).map(n => n.trim()).filter(Boolean)
     if (names.length === 0) {
       names = [
-        "4X.JØKER99", "卂ÏG_ZAMØMENT", "十么IMẞঐT十", "卂ÏG_Mërleeñ", "ð千ŵ丨BOT", 
-        "Åkt_ÅBØKÏ", "ƝK・ŁÃDÃÑ", "DE乂 Joyboy", "DE乂YÆNŚĶII", "~£ŚPÂĎÃ~~*", 
-        "ƝK・Haleefa72", "Åkt_Bäñdit", "會SOULTAKER多", "4X.AMEER520", "卂ÏG_Abubakar", 
-        "DE乂 Papillon", "Sheikh.unknown", "X7 | shred", "Ɓ¹・Bagani", "Psycho", 
-        "ĦĪM¿", "Akt-Itachi"
+        "4X.JØKER99",
+        "卂ÏG_ZAMØMENT",
+        "十么IMẞঐT十",
+        "卂ÏG_Mërleeñ",
+        "ð千ŵ丨BOT",
+        "Åkt_ÅBØKÏ",
+        "ƝK・ŁÃDÃÑ",
+        "DE乂 Joyboy",
+        "DE乂YÆNŚĶII",
+        "£ŚPÂĎÃ~~*",
+        "ƝK・Haleefa72",
+        "Åkt_Bäñdit",
+        "會SOULTAKER多",
+        "4X.AMEER520",
+        "卂ÏG_Abubakar",
+        "DE乂 Papillon",
+        "Sheikh.unknown",
+        "X7 | shred",
+        "Ɓ¹・Bagani",
+        "Psycho",
+        "ĦĪM¿",
+        "Akt-Itachi",
+        "Holywah",
+        "Åkt_CR7ঐ",
+        "ঐ么SIIYAঐ",
+        "X7 | Maajarh",
+        "Badkiller:",
+        "X7 | Xkiller",
+        "d乇.A_AUTA",
+        "ª乇・¿? MOH¿?",
+        "KIƦA",
+        "Åkt_GĦOST"
       ]
     }
     
     // Fill up to 32 players with TBD slots
     const totalSlots = 32
     while (names.length < totalSlots) {
-      names.push(`TBD ${names.length - 21}`)
+      names.push(`TBD ${names.length + 1}`)
     }
     
     // Fisher-Yates shuffle
@@ -74,7 +101,7 @@ export function AdminTournamentSetup() {
       "ƝK・ŁÃDÃÑ",
       "DE乂 Joyboy",
       "DE乂YÆNŚĶII",
-      "~£ŚPÂĎÃ~~*",
+      "£ŚPÂĎÃ~~*",
       "ƝK・Haleefa72",
       "Åkt_Bäñdit",
       "會SOULTAKER多",
@@ -87,16 +114,16 @@ export function AdminTournamentSetup() {
       "Psycho",
       "ĦĪM¿",
       "Akt-Itachi",
-      "TBD 1",
-      "TBD 2",
-      "TBD 3",
-      "TBD 4",
-      "TBD 5",
-      "TBD 6",
-      "TBD 7",
-      "TBD 8",
-      "TBD 9",
-      "TBD 10"
+      "Holywah",
+      "Åkt_CR7ঐ",
+      "ঐ么SIIYAঐ",
+      "X7 | Maajarh",
+      "Badkiller:",
+      "X7 | Xkiller",
+      "d乇.A_AUTA",
+      "ª乇・¿? MOH¿?",
+      "KIƦA",
+      "Åkt_GĦOST"
     ]
     const defaults: Record<number, string> = {}
     for (let seed = 1; seed <= 32; seed++) {
@@ -118,8 +145,11 @@ export function AdminTournamentSetup() {
 
     try {
       // Clear existing data (only tables in schema)
-      await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-      await supabase.from('players').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      const { error: deleteMatchesErr } = await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      if (deleteMatchesErr) throw deleteMatchesErr
+
+      const { error: deletePlayersErr } = await supabase.from('players').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      if (deletePlayersErr) throw deletePlayersErr
 
       // Insert players
       const playerNamesList: string[] = []
@@ -223,13 +253,14 @@ export function AdminTournamentSetup() {
       const { error: stateError } = await supabase
         .from('tournament_state')
         .update({ status: 'in_progress', updated_at: new Date().toISOString() })
-        .eq('id', tournamentState?.id)
+        .eq('id', tournamentState?.id || '00000000-0000-0000-0000-000000000000')
 
       if (stateError) throw stateError
 
       await refreshData()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to initialize tournament')
+    } catch (err: any) {
+      console.error('Failed to initialize tournament:', err)
+      setError(err?.message || err?.details || (err instanceof Error ? err.message : 'Failed to initialize tournament'))
     } finally {
       setLoading(false)
     }
@@ -237,16 +268,25 @@ export function AdminTournamentSetup() {
 
   const resetTournament = async () => {
     setLoading(true)
+    setError(null)
     try {
-      await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-      await supabase.from('players').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-      await supabase
+      const { error: deleteMatchesErr } = await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      if (deleteMatchesErr) throw deleteMatchesErr
+
+      const { error: deletePlayersErr } = await supabase.from('players').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      if (deletePlayersErr) throw deletePlayersErr
+
+      const { error: stateError } = await supabase
         .from('tournament_state')
         .update({ status: 'not_started', updated_at: new Date().toISOString() })
-        .eq('id', tournamentState?.id)
+        .eq('id', tournamentState?.id || '00000000-0000-0000-0000-000000000000')
+      if (stateError) throw stateError
       
       setPlayerNames({})
       await refreshData()
+    } catch (err: any) {
+      console.error('Failed to reset tournament:', err)
+      setError(err?.message || err?.details || (err instanceof Error ? err.message : 'Failed to reset tournament'))
     } finally {
       setLoading(false)
     }

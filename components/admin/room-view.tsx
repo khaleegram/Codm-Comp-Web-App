@@ -152,7 +152,7 @@ function RoomMatchCard({ match }: { match: Match }) {
       await supabase
         .from('tournament_state')
         .update({ status: 'completed', updated_at: new Date().toISOString() })
-        .eq('id', tournamentState?.id)
+        .eq('id', tournamentState?.id || '00000000-0000-0000-0000-000000000000')
     }
     
     // Mark loser as eliminated
