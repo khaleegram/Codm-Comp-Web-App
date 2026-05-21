@@ -16,9 +16,6 @@ import {
   Share2, 
   Trophy, 
   Tv, 
-  Gamepad2, 
-  ChevronDown, 
-  ChevronUp, 
   Info
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -29,7 +26,6 @@ export function FixturesList() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRound, setSelectedRound] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
-  const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null)
 
   // Compute stats
   const totalMatches = matches.length
@@ -75,10 +71,6 @@ export function FixturesList() {
     })
   }, [matches, searchQuery, selectedRound, selectedStatus])
 
-  const toggleExpand = (id: string) => {
-    setExpandedMatchId(prev => (prev === id ? null : id))
-  }
-
   const handleShare = async (match: Match) => {
     const stageName = getRoundName(match.round)
 
@@ -103,29 +95,11 @@ export function FixturesList() {
       scoreText = `⚔️ Matchup: ${p1Name} vs ${p2Name}`
     }
 
-    // Detail scores
-    let details = ''
-    if (match.status === 'completed' || match.status === 'in_progress') {
-      const gameScores = []
-      if (match.game1_p1_score !== null && match.game1_p2_score !== null) {
-        gameScores.push(`   • Game 1 (Sniper): ${match.game1_p1_score} - ${match.game1_p2_score}`)
-      }
-      if (match.game2_p1_score !== null && match.game2_p2_score !== null) {
-        gameScores.push(`   • Game 2 (Shotgun): ${match.game2_p1_score} - ${match.game2_p2_score}`)
-      }
-      if (match.game3_p1_score !== null && match.game3_p2_score !== null) {
-        gameScores.push(`   • Game 3 (Choice): ${match.game3_p1_score} - ${match.game3_p2_score}`)
-      }
-      if (gameScores.length > 0) {
-        details = `\n🎮 Game Details:\n${gameScores.join('\n')}`
-      }
-    }
-
     const shareText = `🏆 Arewa Hausa CODM Community Competition 🏆
 ━━━━━━━━━━━━━━━━━━━━━━━━
 📅 Stage: ${stageName}
 ${scoreText}
-${statusText}${details}
+${statusText}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 Join/follow live brackets at: ${window.location.origin}`
 
@@ -271,8 +245,6 @@ Join/follow live brackets at: ${window.location.origin}`
             const p1IsWinner = fixture.winner_id !== null && fixture.player1_id === fixture.winner_id
             const p2IsWinner = fixture.winner_id !== null && fixture.player2_id === fixture.winner_id
 
-            const isExpanded = expandedMatchId === fixture.id
-
             return (
               <div 
                 key={fixture.id}
@@ -394,21 +366,6 @@ Join/follow live brackets at: ${window.location.origin}`
 
                   {/* Right Side: Action buttons */}
                   <div className="flex items-center gap-2 self-end md:self-center">
-                    {(isMatchLive || isMatchCompleted) && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleExpand(fixture.id)}
-                        className="text-zinc-400 hover:text-white hover:bg-zinc-900/40"
-                      >
-                        {isExpanded ? (
-                          <>Hide Scores <ChevronUp className="ml-1 h-4 w-4" /></>
-                        ) : (
-                          <>Show Scores <ChevronDown className="ml-1 h-4 w-4" /></>
-                        )}
-                      </Button>
-                    )}
-
                     <Button
                       variant="outline"
                       size="sm"
@@ -420,99 +377,11 @@ Join/follow live brackets at: ${window.location.origin}`
                     </Button>
                   </div>
                 </div>
-
-                {/* Collapsible Game Scores Panel */}
-                {isExpanded && (isMatchLive || isMatchCompleted) && (
-                  <div className="border-t border-zinc-850 bg-black/20 p-4 pl-6 animate-in slide-in-from-top-1 duration-200">
-                    <h4 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                      <Gamepad2 className="h-3.5 w-3.5 text-primary" /> Game Breakdowns
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {/* Game 1: Sniper */}
-                      <GameBreakdownBox 
-                        label="Game 1 (Sniper)"
-                        p1Score={fixture.game1_p1_score}
-                        p2Score={fixture.game1_p2_score}
-                        p1Name={p1Name}
-                        p2Name={p2Name}
-                      />
-
-                      {/* Game 2: Shotgun */}
-                      <GameBreakdownBox 
-                        label="Game 2 (Shotgun)"
-                        p1Score={fixture.game2_p1_score}
-                        p2Score={fixture.game2_p2_score}
-                        p1Name={p1Name}
-                        p2Name={p2Name}
-                      />
-
-                      {/* Game 3: Choice */}
-                      {(fixture.game3_p1_score !== null || fixture.game3_p2_score !== null) ? (
-                        <GameBreakdownBox 
-                           label="Game 3 (Choice)"
-                           p1Score={fixture.game3_p1_score}
-                           p2Score={fixture.game3_p2_score}
-                           p1Name={p1Name}
-                           p2Name={p2Name}
-                        />
-                      ) : (
-                        <div className="p-2.5 rounded-lg border border-zinc-900 bg-zinc-950/20 text-center text-xs text-zinc-500 italic flex items-center justify-center min-h-[72px]">
-                          Game 3 not needed
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             )
           })}
         </div>
       )}
-    </div>
-  )
-}
-
-interface GameBreakdownBoxProps {
-  label: string
-  p1Score: number | null
-  p2Score: number | null
-  p1Name: string
-  p2Name: string
-}
-
-function GameBreakdownBox({ label, p1Score, p2Score, p1Name, p2Name }: GameBreakdownBoxProps) {
-  if (p1Score === null && p2Score === null) {
-    return (
-      <div className="p-3 rounded-lg border border-zinc-900 bg-zinc-950/20 flex flex-col justify-center min-h-[72px]">
-        <div className="text-xs text-zinc-500 font-medium mb-1">{label}</div>
-        <div className="text-xs text-zinc-500/40 italic">Not started</div>
-      </div>
-    )
-  }
-
-  const p1Val = p1Score ?? 0
-  const p2Val = p2Score ?? 0
-  const p1Won = p1Val > p2Val
-  const p2Won = p2Val > p1Val
-
-  return (
-    <div className="p-3 rounded-lg border border-zinc-800 bg-zinc-950/40 flex flex-col justify-between min-h-[72px]">
-      <div className="text-xs text-zinc-400 font-medium mb-1.5">{label}</div>
-      <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-1.5 min-w-0 max-w-[42%]">
-            <span className={cn("truncate text-zinc-300", p1Won && "font-bold text-emerald-400")}>{p1Name}</span>
-          </div>
-          <div className="flex items-center justify-center gap-2 bg-zinc-900/50 px-2 py-0.5 rounded border border-zinc-800 font-mono text-[11px] font-bold text-white">
-            <span className={cn(p1Won && "text-emerald-400")}>{p1Score ?? '-'}</span>
-            <span className="text-zinc-650">-</span>
-            <span className={cn(p2Won && "text-emerald-400")}>{p2Score ?? '-'}</span>
-          </div>
-          <div className="flex items-center gap-1.5 min-w-0 max-w-[42%] justify-end text-right">
-            <span className={cn("truncate text-zinc-300", p2Won && "font-bold text-emerald-400")}>{p2Name}</span>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

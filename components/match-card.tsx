@@ -81,32 +81,6 @@ export function MatchCard({ match, showConnector = false, isCompact = false }: M
         />
       </div>
 
-      {/* Game scores tooltip/detail */}
-      {(isLive || isCompleted) && (
-        <div className={cn(
-          "flex justify-center gap-2 pt-2 border-t border-border mt-2",
-          isCompact && "text-xs"
-        )}>
-          <GameScore 
-            label="G1" 
-            p1={match.game1_p1_score} 
-            p2={match.game1_p2_score} 
-          />
-          <GameScore 
-            label="G2" 
-            p1={match.game2_p1_score} 
-            p2={match.game2_p2_score} 
-          />
-          {(match.game3_p1_score !== null || match.game3_p2_score !== null) && (
-            <GameScore 
-              label="G3" 
-              p1={match.game3_p1_score} 
-              p2={match.game3_p2_score} 
-            />
-          )}
-        </div>
-      )}
-
       {showConnector && <Connector />}
     </div>
   )
@@ -156,30 +130,6 @@ function PlayerSlot({
           {score}
         </span>
       )}
-    </div>
-  )
-}
-
-function GameScore({ 
-  label, 
-  p1, 
-  p2 
-}: { 
-  label: string
-  p1: number | null
-  p2: number | null 
-}) {
-  if (p1 === null && p2 === null) return null
-  
-  const p1Won = p1 !== null && p2 !== null && p1 > p2
-  const p2Won = p1 !== null && p2 !== null && p2 > p1
-  
-  return (
-    <div className="flex items-center gap-1 text-xs">
-      <span className="text-muted-foreground">{label}:</span>
-      <span className={cn(p1Won && "text-accent font-bold")}>{p1 ?? '-'}</span>
-      <span className="text-muted-foreground">-</span>
-      <span className={cn(p2Won && "text-accent font-bold")}>{p2 ?? '-'}</span>
     </div>
   )
 }
